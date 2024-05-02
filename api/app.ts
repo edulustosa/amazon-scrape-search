@@ -14,9 +14,10 @@ app.use(cors())
 
 interface ProductInformation {
   title: string
-  rating: string
+  rating: number
   numberOfReviews: number
   imageURL: string
+  link: string
 }
 
 // Using Scraping Ant and their proxy service to scrape Amazon product data
@@ -54,21 +55,33 @@ app.get('/api/scrape', async (req, res) => {
     // Collect the information of every product
     for (const product of products) {
       const title = product.querySelector('.a-size-base-plus')?.innerHTML || ''
-      const rating = product.querySelector('.a-icon-alt')?.innerHTML || ''
+
+      // Get the rating as a string and then convert to a number
+      const ratingStr = product.querySelector('.a-icon-alt')?.innerHTML || ''
+      const rating = Number(ratingStr.split(' ')[0].replace(',', '.'))
+
+      console.log(product.querySelector('.a-size-base')?.innerHTML)
 
       const numberOfReviews = Number(
-        product.querySelector('.a-size-base')?.innerHTML
+        product.querySelector('span.a-size-base.s-underline-text')?.innerHTML
       )
 
       const imageURL = product.querySelector('img')?.src || ''
+
+      // Format the link to access amazon.com, without this the link points to the current site
+      const linkStr = product.querySelector('a')?.href || ''
+      const link = 'https://amazon.com.br' + linkStr
 
       scrapedData.push({
         title,
         rating,
         numberOfReviews,
         imageURL,
+        link,
       })
     }
+
+    console.log(scrapedData)
 
     return res.json({ scrapedData })
   } catch (err) {
@@ -76,13 +89,13 @@ app.get('/api/scrape', async (req, res) => {
 
     if (err instanceof ZodError) {
       return res.status(400).json({
-        message: 'keyword required',
+        message: 'Keyword required',
       })
     }
 
     if (err instanceof AxiosError) {
       return res.status(500).json({
-        message: 'failed to get products',
+        message: 'Failed to get products',
       })
     }
 
