@@ -60,8 +60,6 @@ app.get('/api/scrape', async (req, res) => {
       const ratingStr = product.querySelector('.a-icon-alt')?.innerHTML || ''
       const rating = Number(ratingStr.split(' ')[0].replace(',', '.'))
 
-      console.log(product.querySelector('.a-size-base')?.innerHTML)
-
       const numberOfReviews = Number(
         product.querySelector('span.a-size-base.s-underline-text')?.innerHTML
       )
@@ -80,8 +78,6 @@ app.get('/api/scrape', async (req, res) => {
         link,
       })
     }
-
-    console.log(scrapedData)
 
     return res.json({ scrapedData })
   } catch (err) {
